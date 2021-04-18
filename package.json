@@ -1,0 +1,13 @@
+{
+    "name": "node_rest_API",
+    "version": "1.0.0",
+    "description": "REST API for writing Hello World",
+    "author": "Maider Calzada Aláez",
+    "main": "nodeServer.js",
+    "scripts": {
+        "start": "node server/nodeServer.js"
+    },
+    "dependencies": {
+        "express": "^4.17.1"
+    }
+}
