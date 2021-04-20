@@ -35,10 +35,19 @@ pipeline {
           steps{
             script {
               docker.withRegistry('', registryCredential) {
-                dockerImage.push("$BUILD_NUMBER")
-                dockerImage.push("latest")
+                bat "docker run -d -p 8081:8081 nodeapi:$BUILD_NUMBER"
               }
             }
+          }
+        }
+     
+        stage('Deploy k8s') {
+          steps {
+            kubernetesDeploy(
+              kubeconfigId: 'k8s',
+              configs: 'manifest.yml',
+              enableConfigSubstitution: true
+            )
           }
         }
         
