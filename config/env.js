@@ -1,5 +1,5 @@
 
 module.exports = {
-    PORT: 3000,
+    PORT: 8081,
     HOST: '0.0.0.0'
 }
