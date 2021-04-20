@@ -1,61 +1,29 @@
-pipeline {
-    agent any
- 
-    tools {nodejs "node"}
-    
-    environment {
-        registry = "maidercalzada/node-api-hello-world"
-        registryCredential = '44b49d1c-17e9-467a-b38f-908d527c6697'
-        docker_image_name = "nodeapi"
-    }
- 
-    stages {
- 
-        stage('Cloning Git') {
-            steps {
-                git 'https://github.com/MaiderC/Node-js-hello-world-API-CI.git'
-            }
-        }
-        
-        stage('Build image') 
-        {
-          steps
-          {
-            script 
-            {
-                docker.withRegistry('', registryCredential)
-                {
-                  dockerImage = docker.build docker_image_name + ":$BUILD_NUMBER"
-                }
-            }
-          }
-        }
-        
-       stage('Deploy image') {
-          steps{
-            script {
-              docker.withRegistry('', registryCredential) {
-                sh "docker docker run -d -p 8081:8081 --name NodeApiContainer nodeapi:$BUILD_NUMBER"
-              }
-            }
-          }
-        }
-        
-        stage('Remove image') {
-          steps{
-            sh "docker rmi nodeapi:$BUILD_NUMBER"
-          }
-        }
-     
-        stage('Deploy k8s') {
-          steps {
-            kubernetesDeploy(
-              kubeconfigId: 'k8s',
-              configs: 'manifest.yml',
-              enableConfigSubstitution: true
-            )
-          }
-        }
-        
-    }
-}
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: nodeapi
+spec:
+  replicas: 2
+  template:
+    metadata:
+      name: nodeapi
+      labels:
+        app: nodeapi
+    spec:
+      containers:
+      - image: nodeapi:70
+        name: nodejs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodeapi
+spec:
+  type: LoadBalancer
+  externalIPs:
+  - 10.96.0.1
+  selector:
+    app: nodeapi
+  ports:
+  - port: 8081
+    targetPort: 6443
